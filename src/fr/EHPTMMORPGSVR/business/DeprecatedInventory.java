@@ -15,13 +15,13 @@ public class DeprecatedInventory {
 		content = toCopy;
 	}
 	
-	public Item getContent(int location){
-		return content[location];
-	}
-	
 	public void addToInventory(Item item){
 		content[currentSlot] = item;
 		currentSlot++;
+	}
+	
+	public Item getContent(int location){
+		return content[location];
 	}
 	
 	public String toString(){

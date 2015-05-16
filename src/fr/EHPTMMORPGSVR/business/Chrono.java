@@ -1,4 +1,5 @@
 package fr.EHPTMMORPGSVR.business;
 
-public class Obstacle{
+public class Chrono extends Thread{
+	
 }

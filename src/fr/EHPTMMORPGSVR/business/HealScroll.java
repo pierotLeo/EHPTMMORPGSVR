@@ -7,12 +7,10 @@ public class HealScroll extends Consummable {
 		this.heal = heal;
 	}
 	
-	public boolean use(PlayableCharacter user){
+	public void use(PlayableCharacter user){
 		if(user.getCurrentHp() < MAX_HEALTH){
 			user.heal(heal);
-			return true;
 		}
-		return false;
 	}
 	
 

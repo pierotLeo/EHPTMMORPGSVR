@@ -2,58 +2,81 @@ package fr.EHPTMMORPGSVR.business;
 
 import java.sql.Date;
 
-public class DefaultCharacter implements Constants{
+public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 	
 	private Stat[] abilities;
 	private String name;
 	private int currentHp;
 	private int pa;
 	private int totalXp;
-	private Date dla;
-	//private Map map;
-	//private DefaultCharacter target;
+	private Inventory inventory;
+	private long dla;
+	private int lineOfSight;
+	private Map map;
+	private DefaultCharacter target;
 	
-	public DefaultCharacter(){//Map map){
-		this("", 0, 0, 0, 0, 0, 0);//, map);
-	}
-	
-	public DefaultCharacter(String name, int xp){// Map map){
-		this(name, xp, 0, 0, 0, 0, 0);//, map);
-	}
-	
-	public DefaultCharacter (String name, int xp, int init, int hit, int dodge, int def, int dmg){//, Map map){
-		this.name = name;
-		this.totalXp = xp;
-		
-		abilities = new Stat[NUMBER_OF_ABILITIES];
-		abilities[INITIATIVE] = new Stat(init);
-		abilities[HIT] = new Stat(hit);
-		abilities[DODGE] = new Stat(dodge);
-		abilities[DEFENSE] = new Stat(def);
-		abilities[DAMAGE] = new Stat(dmg);
-		
-		currentHp = MAX_HEALTH;
-		pa = DEFAULT_PA;
-		dla = new Date(System.currentTimeMillis());
-		//this.map = map;
+	public DefaultCharacter(Map map){
+		this("", 0, 0, 0, 0, 0, 0, map);
 	}
 	
 	public DefaultCharacter (DefaultCharacter toCopy){
 		this(toCopy.name, toCopy.totalXp, toCopy.abilities[INITIATIVE].getLevel(), 
 				toCopy.abilities[HIT].getLevel(), toCopy.abilities[DODGE].getLevel(), 
-				toCopy.abilities[DEFENSE].getLevel(), toCopy.abilities[DAMAGE].getLevel());//, toCopy.getMap());
+				toCopy.abilities[DEFENSE].getLevel(), toCopy.abilities[DAMAGE].getLevel(), toCopy.getMap());
 	}
 	
-	public String toString(){
-		
-		String character = "Nom : " + name + "\n" +
-				           //"Jauge de vie: " + currentHp + "/" + MAX_HEALTH + "\n" +
-				           "Sante :" + getInjuryLevel() + "\n" +
-				           "Experience : " + totalXp + "\n" ;
-				
-		return character;
+	public DefaultCharacter(String name, int xp, Map map){
+		this(name, xp, 0, 0, 0, 0, 0, map);
 	}
+	
+	public DefaultCharacter (String name, int xp, int init, int hit, int dodge, int def, int dmg, Map map){
+		this.name = name;
+		this.totalXp = xp;
 		
+		abilities = new Stat[NUMBER_OF_ABILITIES];
+		abilities[INITIATIVE] = new Stat(init, "Initiative");
+		abilities[HIT] = new Stat(hit, "Toucher");
+		abilities[DODGE] = new Stat(dodge, "Esquive");
+		abilities[DEFENSE] = new Stat(def, "Défense");
+		abilities[DAMAGE] = new Stat(dmg, "Dégâts");
+		
+		currentHp = MAX_HEALTH;
+		pa = DEFAULT_PA;
+		lineOfSight = DEFAULT_LOS;
+		dla = System.currentTimeMillis();
+		inventory = new Inventory(this);
+		this.map = map;
+	}
+	
+	public void addToPa(int pa){
+		this.pa += pa;
+	}
+	
+	public void addToTotalXp(int xp){
+		totalXp += xp;
+	}
+	
+	
+	public Stat getAbility(int abilitie){
+		return abilities[abilitie];
+	}
+	
+	public int getCurrentHp(){
+		return currentHp;
+	}
+	
+	public long getDla(){
+		return dla;
+	}
+	
+	public void setMap(Map map){
+		this.map = map;
+	}
+	
+	public void setDla(long dla){
+		this.dla = dla;
+	}
+	
 	public String getInjuryLevel(){
 		String character = "";
 		switch(injuryLevel()){
@@ -82,76 +105,35 @@ public class DefaultCharacter implements Constants{
 		return character;
 	}
 	
-	public Stat getAbility(int abilitie){
-		return abilities[abilitie];
-	}
-	
-	public Date getDla(){
-		return dla;
-	}
-	
-	/*public Map getMap(){
+	public Map getMap(){
 		return map;
-	}*/
-	
-	public int getCurrentHp(){
-		return currentHp;
 	}
 	
-	public int getPa(){
-		return pa;
+	public Inventory getInventory(){
+		return inventory;
+	}
+	
+	public int getLineOfSight(){
+		return lineOfSight;
 	}
 	
 	public String getName(){
 		return name;
 	}
 	
-	/*public DefaultCharacter getTarget(){
+	public DefaultCharacter getTarget(){
 		return target;
-	}*/
+	}
+	
+	public int getPa(){
+		return pa;
+	}
 	
 	public int getTotalXp(){
 		return totalXp;
 	}
 	
-	public void setTotalXp(int xp){
-		totalXp = xp;
-	}
-	
-	public void setPa(int pa){
-		this.pa = pa;
-	}
-	
-	/*public void setTarget(DefaultCharacter target){
-		this.target = target;
-	}*/
-	
-	public void setCurrentHp(int health){
-		currentHp = health;
-	}
-	
-	public void addToTotalXp(int xp){
-		totalXp += xp;
-	}
-	
-	public void addToPa(int pa){
-		this.pa += pa;
-	}
-	
-	public void subToPa(int pa){
-		this.pa -= pa;
-	}
-	
-	public void takeDamage(int damage){
-		if(currentHp - damage >= 0){
-			currentHp -= damage;
-		}
-			
-		else
-			currentHp = 0;
-	}
-	
-	//rajoute ou soustrait de la sant� � la sant� actuelle.
+	//rajoute ou soustrait de la santé é la santé actuelle.
 	public void heal(int heal){
 		if(currentHp + heal < MAX_HEALTH){
 			currentHp += heal;
@@ -159,6 +141,14 @@ public class DefaultCharacter implements Constants{
 		else{
 			currentHp = MAX_HEALTH;
 		}
+	}
+	
+	public void setAbility(int ability, Stat value){
+		abilities[ability] = value;
+	}
+	
+	public void setTarget(DefaultCharacter target){
+		this.target = target;
 	}
 	
 	//retourne le niveau de blessure du personnage en fonction de ses points de vie restants.
@@ -175,10 +165,39 @@ public class DefaultCharacter implements Constants{
 	public boolean isAlive(){
 		return injuryLevel() > DEATH;
 	}
-				
-	//retourne un lanc� de d� de la stat souhait�e.
+	
+	//retourne un lancé de dé de la stat souhaitée.
 	public int roll(int stat){
 		return abilities[stat].rollDice();
+	}
+	
+	public void setCurrentHp(int health){
+		currentHp = health;
+	}
+	
+	public void setLineOfSight(int lineOfSight){
+		this.lineOfSight = lineOfSight;
+	}
+	
+	public void setPa(int pa){
+		this.pa = pa;
+	}
+	
+	public void setTotalXp(int xp){
+		totalXp = xp;
+	}
+	
+	public void subToPa(int pa){
+		this.pa -= pa;
+	}
+				
+	public void takeDamage(int damage){
+		if(currentHp - damage >= 0){
+			currentHp -= damage;
+		}
+			
+		else
+			currentHp = 0;
 	}
 	
 	/*public boolean isNextTo(DefaultCharacter target){
@@ -188,12 +207,17 @@ public class DefaultCharacter implements Constants{
 		return (charaLocation.getX()+1 == targetLocation.getX() && charaLocation.getY() == targetLocation.getY()) || (charaLocation.getX()-1 == targetLocation.getX() && charaLocation.getY() == targetLocation.getY()) || (charaLocation.getX() == targetLocation.getX() && charaLocation.getY()+1 == targetLocation.getY()) || (charaLocation.getX()+1 == targetLocation.getX() && charaLocation.getY()-1 == targetLocation.getY());
 	}*/
 	
-	public void flee(Battle battle, int direction, int nbMove){
-		//if(getPa()>)
+	public String toString(){
+		
+		String character = "Nom : " + name + "\n" +
+				           //"Jauge de vie: " + currentHp + "/" + MAX_HEALTH + "\n" +
+				           "Sante :" + getInjuryLevel() + "\n" +
+				           "Experience : " + totalXp + "\n" ;
+				
+		return character;
 	}
-	//!\ Combat est d�sormais une classe � part enti�re et plus une m�thode de personnage.
 	
-	//retourne true si la joueur courant a l'initiative. (A d�velopper pour donner automatiquement l'initiative au joueur ennemi en cas de false ?)
+	//retourne true si la joueur courant a l'initiative. (A développer pour donner automatiquement l'initiative au joueur ennemi en cas de false ?)
 	/*public boolean initiate(DefaultCharacter target){
 		int allyInit = roll(INITIATIVE);
 		int tarInit = target.roll(INITIATIVE);
@@ -205,7 +229,7 @@ public class DefaultCharacter implements Constants{
 		return false;
 	}*/
 	
-	//retourne true si le joueur courant parvient � toucher sa cible.
+	//retourne true si le joueur courant parvient é toucher sa cible.
 	/*public boolean hit(DefaultCharacter target){
 		if(roll(HIT) > target.roll(DODGE)){
 			return true;
@@ -213,13 +237,13 @@ public class DefaultCharacter implements Constants{
 		return false;
 	}*/
 	
-	/*//retourne et inflige les damage inflig�s par le joueur courant � la cible apr�s la r�duction li�e � l'armure. On fera �ventuellement remonter la valeur de retour � l'utilisateur.
-	public int dealtDamage(DefaultCharacter target){
+	//retourne et inflige les damage infligés par le joueur courant é la cible aprés la réduction liée é l'armure. On fera éventuellement remonter la valeur de retour é l'utilisateur.
+	/*public int dealtDamage(DefaultCharacter target){
 		int trueDmg = roll(DAMAGE)-target.roll(DEFENSE);
 		
 		
 		if(trueDmg<=0)
-			return ABSORBED;
+			return ABSORB;
 		target.takeDamage(trueDmg);
 		
 		return trueDmg;
@@ -231,28 +255,44 @@ public class DefaultCharacter implements Constants{
 		if(roll(HIT) > target.roll(DODGE)){
 			damage = roll(DAMAGE)-target.roll(DEFENSE);
 			if(damage<=0)
-				return ABSORBED;
+				return ABSORB;
 			target.takeDamage(damage);
 			return damage;
 		}
 		
-		return MISSED;
+		return MISS;
 	}*/
 	
-	//initialise un combat avec la cible du joueur courant. Retourne le nombre de points de d�g�ts inflig�s.
-	/*public int attack(DefaultCharacter target){
+	//initialise un combat avec la cible du joueur courant. Retourne le nombre de points de dégéts infligés.
+	public int attack(DefaultCharacter target){
+		int damage;
 		if (target.isAlive()){
-			if(pa >= PA_TO_ATTACK){	
-				if(getTarget() != target){
-					setTarget(target); 
-					if(target.getTarget() != this)
-						if(roll(INITIATIVE) < target.roll(INITIATIVE))
-							return FAILED;
+			if(map.isNextTo(this, target)){
+				if(pa >= PA_TO_ATTACK || map.dlaReached(this)){	
+					if(this.target != target){
+						this.target = target; 
+						if(target.getTarget() != this)
+							if(roll(INITIATIVE) < target.roll(INITIATIVE)){
+								return FAIL;
+							}
+					}
+					else{
+						if(roll(HIT) > target.roll(DODGE)){
+							damage = roll(DAMAGE)-target.roll(DEFENSE);
+							if(damage<=0)
+								return ABSORB;
+							target.takeDamage(damage);
+							if(!target.isAlive())
+								getMap().setOnCharactersGrid(null, getMap().getCoordinate(target).getX(), getMap().getCoordinate(target).getY());
+							return damage;
+						}
+						return MISS;
+					}
 				}
-				return strike(target);
-			}	
+				return MISSING_PA;
+			}
 		}		
-		return MISSING_PA;
-	}*/
+		return ERROR;
+	}
 
 }

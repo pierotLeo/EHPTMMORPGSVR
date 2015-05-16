@@ -1,6 +1,9 @@
 package fr.EHPTMMORPGSVR.business;
 
-public abstract class Gear extends Item{
-
+public interface Gear extends Item{
+	//private String name;
 	
+	public String getName();
+	
+	public void setName(String name);
 }

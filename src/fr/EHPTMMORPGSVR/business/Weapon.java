@@ -1,57 +1,75 @@
 package fr.EHPTMMORPGSVR.business;
 
-public class Weapon extends Gear {
-	private int hand;
+public class Weapon implements OffensiveGear{
+	//private int hand;
 	private Stat mastery;
 	private Stat impact;
+	private String name;
 	
 	public Weapon(){
-		mastery= new Stat(0);
-		impact= new Stat(0);
+		mastery= new Stat(0, "");
+		impact= new Stat(0, "");
 		setName("");
 	}
 	
-	public Weapon (Weapon weapon){
-		mastery= new Stat(weapon.mastery);
-		impact= new Stat(weapon.impact);
-		setName(weapon.getName());
-		hand = weapon.hand;
+	public Weapon(String name, int mastery, int impact){
+		this.mastery= new Stat(mastery, "Maniabilité");
+		this.impact= new Stat(impact, "Impacte");
+		setName(name);
+		//this.hand = BOTH_HANDS;
 	}
 	
-	public Weapon(String name, Stat mastery, Stat impact, int hand){
-		this.mastery= mastery;
-		this.impact= impact;
+	public String getName(){
+		return name;
+	}
+	
+	/*public Weapon(String name, int mastery, int impact, int hand){
+		this.mastery= new Stat(mastery, "Maniabilité");
+		this.impact= new Stat(impact, "Impacte");
 		setName(name);
-		this.hand = hand;
+		//this.hand = hand;
+	}*/
+	
+	public void setName(String name){
+		this.name = name;
 	}
 	
 	public Weapon(String name, Stat mastery, Stat impact){
 		this.mastery= mastery;
 		this.impact= impact;
 		setName(name);
-		this.hand = BOTH_HANDS;
+		//this.hand = BOTH_HANDS;
 	}
 	
-	public Weapon(String name, int mastery, int impact, int hand){
-		this.mastery= new Stat(mastery);
-		this.impact= new Stat(impact);
+	/*public Weapon(String name, Stat mastery, Stat impact, int hand){
+		this.mastery= mastery;
+		this.impact= impact;
 		setName(name);
-		this.hand = hand;
+		//this.hand = hand;
+	}*/
+	
+	public Weapon (Weapon weapon){
+		mastery= new Stat(weapon.mastery);
+		impact= new Stat(weapon.impact);
+		setName(weapon.getName());
+		//hand = weapon.hand;
 	}
 	
-	public Weapon(String name, int mastery, int impact){
-		this.mastery= new Stat(mastery);
-		this.impact= new Stat(impact);
-		setName(name);
-		this.hand = BOTH_HANDS;
+	public Stat getImpact(){
+		return impact;
+	}
+	
+	public Stat getMastery(){
+		return mastery;
 	}
 	
 	public String toString(){
 		String weapon = getName() + "\n" + 
 						"    Statistiques: \n" +
 						"        Maniabilite: " + mastery + "\n" +
-						"        Impact: " + impact + "\n" + 
-						"        Main: ";
+						"        Impact: " + impact + "\n" +
+						"    Arme.";
+						/*"        Main: ";
 		switch(hand){
 			default:
 				weapon += "cette arme n'a pas de restrictions d'utilisation.\n";
@@ -62,27 +80,24 @@ public class Weapon extends Gear {
 			case LEFT_HAND:
 				weapon += "main gauche.\n";
 				break;
-		};
+		};*/
 		
 		return weapon;
 				
 	}
 	
-	public Stat getMastery(){
-		return mastery;
-	}
-	
-	public Stat getImpact(){
-		return impact;
-	}
-	
-	public boolean use(PlayableCharacter user){
-		if(!this.equals(user.getStuff().getWeapons(hand))){
-			user.getInventory().add(user.getStuff().getWeapons(hand));
-			user.getStuff().setWeapons(this, hand);
-			return true;
+	public void use(PlayableCharacter user){
+		Weapon userRightHand = (Weapon) user.getStuff().getMainHand();
+		if(userRightHand != null)
+			user.getInventory().add(userRightHand);
+		
+		if(!this.equals(userRightHand)){
+			user.getInventory().remove(this);
+			user.getStuff().setMainHand(this);
 		}
-		return false;
+		else{
+			user.getStuff().setMainHand(null);
+		}
 	}
 
 	

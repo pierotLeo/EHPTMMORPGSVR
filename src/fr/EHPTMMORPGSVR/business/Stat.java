@@ -10,68 +10,75 @@ public class Stat {
 	private int addNb;
 	private int xp;
 	private int level;
+	String name;
+	
+	public static Stat operation(Stat s_1, Stat s_2, int operation){
+		Stat s_sum = new Stat(s_1);
+		s_sum.diceNb += operation*s_2.diceNb;
+		s_sum.addNb += operation*s_2.addNb;
+		
+		/*if(backToValue){
+			while(s_sum.addNb < 0 || s_sum.addNb >= 4){
+				s_sum.addNb += -operation*4;
+				s_sum.diceNb += operation;
+			}
+		}
+		else{*/
+		while(s_sum.addNb < 0){
+			s_sum.addNb += -operation*4;
+			s_sum.diceNb += operation;
+			//}
+		}
+		
+		if(s_sum.diceNb < 0){
+			s_sum.diceNb = 0;
+			s_sum.addNb = 0;
+		}
+		return s_sum;
+	}
+	
+	public int getXp(){
+		return xp;
+	}
+	
+	public static Stat sub(Stat s_1, Stat s_2){//, boolean backToValue){
+		return operation(s_1, s_2, OPERATOR_MINUS);//, backToValue);
+	}
+	
+	public static Stat sum(Stat s_1, Stat s_2){//, boolean backToValue){
+		return operation(s_1, s_2, OPERATOR_PLUS);//, backToValue);
+	}
 	
 	public Stat(){ 
-		this(1, 0, 0);
+		this(1, 0, 0, "");
 	}
 	
-	public Stat(int value){
-		this(value/3, value%3, value);
+	public Stat(int value, String name){
+		this(value/4, value%4, value, name);
 	}
 	
-	public Stat(int diceNb, int addNb, int level){
+	public Stat(int diceNb, int addNb, int level, String name){
 		this.diceNb = diceNb;
 		this.addNb = addNb;
-		this.xp = (int) Math.exp(3+(0.25*(level-1)));
+		this.xp = 0;
 		this.level = level;
+		this.name = name;
 	}
 	
 	public Stat(Stat stat){
-		this(stat.diceNb, stat.addNb, stat.level);
+		this(stat.diceNb, stat.addNb, stat.level, stat.name);
+		this.xp = stat.xp;
 	}
 	
-	public String toString(){
-		String stat= this.diceNb+"D"+" + "+this.addNb;
-		return stat;
-	}
-	
-	public void setDiceNb(int diceNb){
-		this.diceNb = diceNb;
-	}
-	
-	public void setAddNb(int addNb){
-		while(addNb > 3 && addNb > 0){
-			this.diceNb++;
-			addNb -= 3;
-		}
-		this.addNb = addNb;
-		
+	public String getName(){
+		return this.name;
 	}
 	
 	public int getLevel(){
 		return level;
 	}
 	
-	public int xpToNextLevel(){
-		return (int) Math.exp(3+(0.25*(level-1)));
-	}
-	
-	private void refreshLevel(){
-		diceNb = 1 + level/3;
-		addNb = level%3;
-	}
-	
-	public void upgrade(int xp){
-		this.xp += xp;
-		
-		while(this.xp >= xpToNextLevel()){
-			this.xp -= xpToNextLevel();
-			level++;
-			refreshLevel();
-		}
-	}
-	
-	//retourne le lanc� de de de la stat courante.
+	//retourne le lancé de de de la stat courante.
 	public int rollDice(){
 		Random rand = new Random();
 		int roll = 0;
@@ -81,33 +88,61 @@ public class Stat {
 		return roll;
 	}
 	
-	//retourne la somme de la stat courante avec la stat passee en parametre.
-	public Stat sum(Stat stat){
-		return sum(this, stat);
+	public void setAddNb(int addNb){
+		this.addNb = addNb;
+		while(this.addNb >= 4){
+			diceNb++;
+			this.addNb -= 4;
+		}	
+	}
+	
+	public void addToAddNb(int addNb){
+		this.addNb += addNb;
+		while(this.addNb >= 4){
+			diceNb++;
+			this.addNb -= 4;
+		}	
+	}
+	
+	public void setDiceNb(int diceNb){
+		this.diceNb = diceNb;
 	}
 	
 	public Stat sub(Stat stat){
 		return sub(this, stat);
 	}
 	
-	public static Stat sum(Stat s_1, Stat s_2){
-		return operation(s_1, s_2, OPERATOR_PLUS);
+	public Stat sum(Stat stat){
+		return sum(this, stat);
 	}
 	
-	public static Stat sub(Stat s_1, Stat s_2){
-		return operation(s_1, s_2, OPERATOR_MINUS);
+	public String toString(){
+		String stat= this.diceNb+"D"+" + "+this.addNb;
+		return stat;
 	}
 	
-	public static Stat operation(Stat s_1, Stat s_2, int operation){
-		Stat s_sum = new Stat(s_1);
-		s_sum.diceNb += operation*s_2.diceNb;
-		s_sum.addNb += operation*s_2.addNb;
-		
-		while(s_sum.addNb < 0 || s_sum.addNb >= 3){
-			s_sum.addNb += -operation*3;
-			s_sum.diceNb += operation;
+	public void upgrade(int xp){
+		this.xp += xp;
+
+		if(this.xp >= xpToNextLevel()){
+			this.xp -= xpToNextLevel();
+			level++;
+			addToAddNb(1);
+			//refreshLevel();
 		}
-		return s_sum;
+	}
+	
+	public int xpToNextLevel(){
+		return (int) Math.exp(3+(0.25*(level-1)));
+	}
+	
+	public int intValue(){
+		return 4*diceNb + addNb;
+	}
+	
+	private void refreshLevel(){
+		diceNb = 1 + level/4;
+		addNb = level%4;
 	}
 
 }

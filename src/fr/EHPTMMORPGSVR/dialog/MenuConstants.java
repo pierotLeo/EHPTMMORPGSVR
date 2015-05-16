@@ -35,6 +35,12 @@ public interface MenuConstants {
 	public static final int HEAD_OR_LEGS = 0;
 	public static final int TORSO_OR_FEET = 1;
 	public static final int HANDS = 2;
-	public static final int RIGHT_HAND = 0;
-	public static final int LEFT_HAND = 1;
+	public static final int LEFT_HAND = 0;
+	public static final int RIGHT_HAND = 1;
+	
+	public static final int INITIATIVE = 0;
+	public static final int HIT = 1;
+	public static final int DODGE = 2;
+	public static final int DEFENSE = 3;
+	public static final int DAMAGE = 4;
 }

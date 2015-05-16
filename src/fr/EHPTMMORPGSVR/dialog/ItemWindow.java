@@ -24,6 +24,32 @@ public class ItemWindow extends JDialog implements MenuConstants{
 	private GameEngine game;
 	private GameWindow owner;
 	
+	class SouthButtonListener implements ActionListener{
+		int action;
+		JDialog itemWindow;
+		
+		public SouthButtonListener(int action, JDialog itemWindow){
+			this.action = action;
+			this.itemWindow = itemWindow;
+		}
+		
+		public void actionPerformed(ActionEvent e){
+			switch(action){
+				case USE:
+					game.getPlayer().use(item);
+					owner.update();
+					itemWindow.dispose();
+					break;
+				case DELETE:
+					if(!game.getPlayer().getInventory().remove(item))
+						game.getPlayer().getStuff().remove(item);
+					owner.update();
+					itemWindow.dispose();
+					break;
+			}
+		}
+	}
+	
 	public ItemWindow(Frame owner, String title, Item item, GameEngine game){
 		super(owner, title);
 		Toolkit tkt = Toolkit.getDefaultToolkit();
@@ -37,11 +63,6 @@ public class ItemWindow extends JDialog implements MenuConstants{
 		initiate();
 		setModal(true);
 		setVisible(true);
-	}
-	
-	public void initiate(){
-		add(getCenterPanel(), BorderLayout.CENTER);
-		add(getSouthPanel(), BorderLayout.SOUTH);
 	}
 	
 	public JPanel getCenterPanel(){
@@ -85,31 +106,8 @@ public class ItemWindow extends JDialog implements MenuConstants{
 		return southPanel;
 	}               
 	
-	class SouthButtonListener implements ActionListener{
-		int action;
-		JDialog itemWindow;
-		
-		public SouthButtonListener(int action, JDialog itemWindow){
-			this.action = action;
-			this.itemWindow = itemWindow;
-		}
-		
-		public void actionPerformed(ActionEvent e){
-			switch(action){
-				case USE:
-					if(!game.getPlayer1().getInventory().use(item))
-						game.getPlayer1().getStuff().use(item);
-					
-					owner.update();
-					itemWindow.dispose();
-					break;
-				case DELETE:
-					if(!game.getPlayer1().getInventory().remove(item))
-						game.getPlayer1().getStuff().remove(item);
-					owner.update();
-					itemWindow.dispose();
-					break;
-			}
-		}
+	public void initiate(){
+		add(getCenterPanel(), BorderLayout.CENTER);
+		add(getSouthPanel(), BorderLayout.SOUTH);
 	}
 }

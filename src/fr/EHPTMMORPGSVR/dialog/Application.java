@@ -3,21 +3,30 @@ package fr.EHPTMMORPGSVR.dialog;
 import fr.EHPTMMORPGSVR.business.Armor;
 import fr.EHPTMMORPGSVR.business.GameEngine;
 import fr.EHPTMMORPGSVR.business.Map;
+import fr.EHPTMMORPGSVR.business.NonPlayableCharacter;
 import fr.EHPTMMORPGSVR.business.PlayableCharacter;
+import fr.EHPTMMORPGSVR.business.Shield;
 import fr.EHPTMMORPGSVR.business.Weapon;
 
 public class Application {
 	public static void main(String[] args){
 		Map map = new Map();
-		PlayableCharacter player = new PlayableCharacter("Rolex", 6, 5, 4, 3);
-		GameEngine game = new GameEngine(player, map);
-		Weapon loklak = new Weapon("LokLak, tÈnËbres des temps anciens", 6, 6, game.RIGHT_HAND);
-		Weapon pongdoh = new Weapon("Pong'Doh, le marteleur planÈtaire", 9, 9, game.RIGHT_HAND);
-		Armor chitine = new Armor("Ecaille de l'Èventreur de mondes", 1,2, game.TORSO); 
+		PlayableCharacter player = new PlayableCharacter("Rolex", 0, 5, 4, 3, map);
+		player.setAvailableXp(200);
+		NonPlayableCharacter mob1 = new NonPlayableCharacter("Gobelin", 600, 6, 6, 6, 6, 6, map);
+		NonPlayableCharacter[] mobs = new NonPlayableCharacter[1];
+		mobs[0] = mob1;
+		GameEngine game = new GameEngine(player, mobs);
+		Weapon loklak = new Weapon("LokLak, t√©n√®bres des temps anciens", 7, 7);///, game.LEFT_HAND);
+		Weapon pongdoh = new Weapon("Pongk'dohr, le marteleur plan√©taire", 9, 9);//, game.RIGHT_HAND);
+		Shield chitine = new Shield("Ecaille de l'√©ventreur de mondes", 5,5); 
+		Armor skin = new Armor("Art√®re du pilier-Monde", 5,5, game.TORSO);
+		
 		map.randomSetOnItemGrid(loklak);
 		map.randomSetOnItemGrid(pongdoh);
 		map.randomSetOnItemGrid(chitine);
+		map.randomSetOnItemGrid(skin);
 		
-		GameWindow window = new GameWindow("MMORPG", game);
+		GameWindow window = new GameWindow("Meuporg", game);
 	}
 }
