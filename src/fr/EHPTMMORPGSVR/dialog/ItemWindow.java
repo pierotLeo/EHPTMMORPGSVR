@@ -19,7 +19,7 @@ import javax.swing.JTextArea;
 import fr.EHPTMMORPGSVR.business.GameEngine;
 import fr.EHPTMMORPGSVR.business.Item;
 
-public class ItemWindow extends JDialog implements MenuConstants{
+public class ItemWindow extends JDialog implements GameInterfaceConstants{
 	private Item item;
 	private GameEngine game;
 	private GameWindow owner;

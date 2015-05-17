@@ -4,18 +4,22 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class NonPlayableCharacter extends DefaultCharacter implements MapConstants{
+	private Thread npcBrain;
+	
 	public NonPlayableCharacter(String name, int xp, int init, int hit, int dodge, int def, int dmg, Map map){//, Coordinate lineOfSight){
 		super(name, xp, init, hit, dodge, def, dmg, map);
 		this.setMap(map);
 		//setLineOfSight(lineOfSight);
-		Thread npcBrain = new Thread(new ArtificialIntelligence(this));
-		//npcBrain.start();
+		npcBrain = new Thread(new ArtificialIntelligence(this));
+		npcBrain.start();
 	}
 	
-	public void activateAI(){
-		
-			
-		
+	public Thread getNpcBrain(){
+		return npcBrain;
+	}
+	
+	public void setNpcBrain(Thread npcBrain){
+		this.npcBrain = npcBrain;
 	}
 	
 	public ArrayList<Coordinate> possibleMovments(){

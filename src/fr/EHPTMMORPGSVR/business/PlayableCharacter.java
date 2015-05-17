@@ -347,7 +347,7 @@ public class PlayableCharacter extends DefaultCharacter implements StuffConstant
 	public int attack(DefaultCharacter target){
 		if (target.isAlive())
 			if(getMap().isNextTo(this, target)){
-				if(getPa() >= PA_TO_ATTACK || getMap().dlaReached(this)){
+				if(getPa() >= PA_TO_ATTACK){
 					subToPa(PA_TO_INITIATE);
 					if(getTarget() != target){
 						setTarget(target);

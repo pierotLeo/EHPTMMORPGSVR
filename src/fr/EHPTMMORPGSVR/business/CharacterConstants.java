@@ -40,6 +40,7 @@ public interface CharacterConstants {
 	
 	//PA 
 	public static final int DEFAULT_PA = 5;
+	public static final int PA_LIMIT = 100;
 	public static final int PA_TO_ATTACK = 3;
 		public static final int PA_TO_INITIATE = 2;
 		public static final int PA_TO_HIT = 1;

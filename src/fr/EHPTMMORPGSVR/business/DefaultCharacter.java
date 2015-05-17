@@ -46,10 +46,15 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 		dla = System.currentTimeMillis();
 		inventory = new Inventory(this);
 		this.map = map;
+		Thread chrono = new Thread(new Chrono(this));
+		chrono.start();
 	}
 	
 	public void addToPa(int pa){
-		this.pa += pa;
+		if(this.pa + pa <= PA_LIMIT)
+			this.pa += pa;
+		else
+			this.pa = PA_LIMIT;
 	}
 	
 	public void addToTotalXp(int xp){
@@ -188,7 +193,8 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 	}
 	
 	public void subToPa(int pa){
-		this.pa -= pa;
+		if(this.pa - pa >= 0)
+			this.pa -= pa;
 	}
 				
 	public void takeDamage(int damage){
@@ -268,7 +274,7 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 		int damage;
 		if (target.isAlive()){
 			if(map.isNextTo(this, target)){
-				if(pa >= PA_TO_ATTACK || map.dlaReached(this)){	
+				if(pa >= PA_TO_ATTACK){	
 					if(this.target != target){
 						this.target = target; 
 						if(target.getTarget() != this)

@@ -17,6 +17,10 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 		period = DEFAULT_PERIOD;
 	}
 	
+	public long getPeriod(){
+		return period;
+	}
+	
 	public static Obstacle[][] generateObstacleGrid(){
 		Obstacle[][] obstacleGrid =  new Obstacle[MAP_WIDTH][MAP_HEIGHT];
 		for(int i=0; i<MAP_WIDTH; i++){
@@ -49,7 +53,7 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 			for(int j = 0; j < MAP_HEIGHT; j++){
 				if(charactersGrid[i][j] instanceof NonPlayableCharacter){
 					NonPlayableCharacter mob = (NonPlayableCharacter) charactersGrid[i][j];
-					mob.activateAI();
+					//mob.activateAI();
 				}
 			}
 		}
@@ -66,7 +70,7 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 	public int move(DefaultCharacter player, int direction){
 		int move = 0;
 		
-		if(player.getPa() >= PA_TO_MOVE || dlaReached(player)){
+		if(player.getPa() >= PA_TO_MOVE){
 			switch(direction){
 				case UP:
 					move = moveToCoordinate(player, -1, 0);
@@ -125,7 +129,7 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 		}
 		return move;
 	}
-	
+	/*
 	public boolean dlaReached(DefaultCharacter character){
 		long currentTimeValue = System.currentTimeMillis();
 		if(currentTimeValue >= character.getDla() + period){
@@ -134,7 +138,7 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 			return true;
 		}
 		return false;
-	}
+	}*/
 	
 	public void randomSetOnCharactersGrid(DefaultCharacter character){
 		Coordinate roll = randomEmptyCoordinates();

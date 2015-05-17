@@ -15,8 +15,16 @@ public class PlayerStatusArea extends JTextArea implements Runnable{
 	}
 	
 	public void run(){
-		while(game.getPlayer().isAlive())
-			this.setText("nom : " + game.getPlayer().getName() + " \nSanté : " + game.getPlayer().getInjuryLevel() + " Expérience dépensée: " + (game.getPlayer().getTotalXp()-game.getPlayer().getAvailableXp()) + "\nExpérience disponible : " + game.getPlayer().getAvailableXp() + "\nPoints d'action : " + game.getPlayer().getPa());
+		while(game.getPlayer().isAlive()){
+			synchronized(this){
+				this.setText("nom : " + game.getPlayer().getName() + " \nSanté : " + game.getPlayer().getInjuryLevel() + " Expérience dépensée: " + (game.getPlayer().getTotalXp()-game.getPlayer().getAvailableXp()) + "\nExpérience disponible : " + game.getPlayer().getAvailableXp() + "\nPoints d'action : " + game.getPlayer().getPa());
+				try{
+					wait(1000);
+				}
+				catch(InterruptedException e){
+					e.printStackTrace();
+				}
+			}
+		}
 	}
-
 }

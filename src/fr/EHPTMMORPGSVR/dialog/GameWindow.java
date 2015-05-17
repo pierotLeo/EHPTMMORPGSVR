@@ -29,7 +29,7 @@ import fr.EHPTMMORPGSVR.business.Weapon;
 import fr.EHPTMMORPGSVR.business.OffensiveGear;
 import fr.EHPTMMORPGSVR.business.*;
 
-public class GameWindow extends JFrame implements MenuConstants{
+public class GameWindow extends JFrame implements GameInterfaceConstants{
 	/**
 	 * 
 	 */
@@ -157,7 +157,7 @@ public class GameWindow extends JFrame implements MenuConstants{
 			mapArea.requestFocusInWindow();
 		}
 		
-		add(getNorthPanel(), BorderLayout.NORTH);
+		//add(getNorthPanel(), BorderLayout.NORTH);
 		
 	}
 	
@@ -341,7 +341,7 @@ public class GameWindow extends JFrame implements MenuConstants{
 		return attackPanel;
 	}
 	
-	private JPanel drawMap(){
+	public JPanel drawMap(){
 		JPanel mapPanel = new JPanel(new GridLayout(game.MAP_WIDTH, game.MAP_HEIGHT));
 		JButton[][] map = new JButton[game.MAP_WIDTH][game.MAP_HEIGHT];
 		Object visibleTile = null;
@@ -414,6 +414,7 @@ public class GameWindow extends JFrame implements MenuConstants{
 		else
 			map.setText(game.getMap().toString());
 		*/
+		
 		JPanel attackPanel = drawAttackPanel();
 		map = drawMap();
 		mapArea.addKeyListener(new MapKeyListener());
@@ -486,7 +487,8 @@ public class GameWindow extends JFrame implements MenuConstants{
 		history = new JTextArea("");
 		history.setEditable(false);
 		playerStats = drawPlayerStats();
-		
+		Thread Map = new Thread(new MapArea(game, this));
+		Map.start();
 		
 		tabbedMenu.addTab("Carte", mapArea);
 		tabbedMenu.addTab("Inventaire", inventory);
@@ -504,6 +506,7 @@ public class GameWindow extends JFrame implements MenuConstants{
 		JTextArea chatView = new JTextArea("");
 		chatView.setEditable(false);
 		JTextField chatBox = new JTextField("                                                     ");
+		chatBox.setText("");
 		
 		eastPanel.add(chatView);
 		eastPanel.add(chatBox, BorderLayout.SOUTH);
@@ -512,12 +515,12 @@ public class GameWindow extends JFrame implements MenuConstants{
 	}
 	
 	private JPanel getNorthPanel(){
-		JPanel northPanel = new JPanel();
-		playerStatus = new JTextArea("nom : " + game.getPlayer().getName() + " \nSanté : " + game.getPlayer().getInjuryLevel() + " Expérience dépensée: " + (game.getPlayer().getTotalXp()-game.getPlayer().getAvailableXp()) + "\nExpérience disponible : " + game.getPlayer().getAvailableXp() + "\nPoints d'action : " + game.getPlayer().getPa());
-		playerStatus.setEditable(false);
+		JPanel northPanel = new NorthPanel(game);
+		//playerStatus = new JTextArea("nom : " + game.getPlayer().getName() + " \nSanté : " + game.getPlayer().getInjuryLevel() + " Expérience dépensée: " + (game.getPlayer().getTotalXp()-game.getPlayer().getAvailableXp()) + "\nExpérience disponible : " + game.getPlayer().getAvailableXp() + "\nPoints d'action : " + game.getPlayer().getPa());
+		//playerStatus.setEditable(false);
 		
 		
-		northPanel.add(playerStatus);
+		//northPanel.add(playerStatus);
 
 		
 		return northPanel;
