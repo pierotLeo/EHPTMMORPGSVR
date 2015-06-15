@@ -1,25 +1,104 @@
 package fr.EHPTMMORPGSVR.business;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
+import fr.EHPTMMORPGSVR.dialog.GameWindow;
+
 public class NonPlayableCharacter extends DefaultCharacter implements MapConstants{
-	private Thread npcBrain;
+	private NpcBrain npcBrain;
+	private PlayableCharacter focusedTarget;
 	
 	public NonPlayableCharacter(String name, int xp, int init, int hit, int dodge, int def, int dmg, Map map){//, Coordinate lineOfSight){
 		super(name, xp, init, hit, dodge, def, dmg, map);
 		this.setMap(map);
 		//setLineOfSight(lineOfSight);
-		npcBrain = new Thread(new ArtificialIntelligence(this));
+		setId(5000);
+		buildLootTable();
+		npcBrain = new NpcBrain(new ArtificialIntelligence(this));
 		npcBrain.start();
+	}
+	
+	public void buildLootTable(){
+		Random rand = new Random();
+		int randItem = rand.nextInt(15);
+		Item item;
+		
+		switch(randItem){
+			default:
+				item = new HealScroll(rand.nextInt(7));
+				break;
+			case 0:
+				item = new Weapon("LokLak, ténèbres des temps anciens", 4, 3);
+				break;
+			case 1:
+				item = new Weapon("Pongk'dohr, le marteleur planétaire", 2, 7);
+				break;
+			case 2: 
+				item = new Shield("Vieux sage endormi", 6,3); 
+				break;
+			case 3:
+				item = new Armor("Hanabi, yukata aux milles étoiles", 3,5, TORSO);
+				break;
+			case 4:
+				item = new Armor("Chaussons aux pommes", 1, 1, FEET);
+				break;
+			case 5:
+				item = new Armor("Gantelets du gitan de la baleine échouée suspects", 5, 0, HANDS);
+				break;
+			case 6:
+				item = new Armor("Vieux poulet mexicain", 4, 3, HEAD);
+				break;
+			case 7:
+				item = new Armor("Pyjama du Nidus", 2, 2, LEGS);
+				break;
+			case 8:
+				item = new Armor("Mouffles en intestin de banane", 3, 2, HANDS);
+				break;
+		}
+		this.getInventory().add(item);
 	}
 	
 	public Thread getNpcBrain(){
 		return npcBrain;
 	}
 	
-	public void setNpcBrain(Thread npcBrain){
+	public PlayableCharacter getFocusedTarget(){
+		return focusedTarget;
+	}
+	
+	public void setNpcBrain(NpcBrain npcBrain){
 		this.npcBrain = npcBrain;
+	}
+	
+	
+	public boolean playerNear(){
+		boolean playerNear = false;
+		PlayableCharacter player = null;
+		Coordinate npc = this.getMap().getCoordinate(this);
+		
+		for(int los = 0; los<getLineOfSight(); los++){
+			for(int line = -los; line<los; line++){
+				for(int col = -los; col<los; col++){
+					//System.out.println("col : " + col + "\n line : " + line + "\nlos : " + los);
+					if(npc.getX() + line < MAP_WIDTH && npc.getX() + line >= 0 && npc.getY() + col < MAP_HEIGHT && npc.getY() + col >= 0)
+						if(getMap().getOnCharactersGrid(npc.getX() + line, npc.getY() + col) != null && getMap().getOnCharactersGrid(npc.getX() + line, npc.getY() + col) instanceof PlayableCharacter){
+							player = (PlayableCharacter) getMap().getOnCharactersGrid(npc.getX() + line, npc.getY() + col);
+							focusedTarget = player;
+							playerNear = true;
+							break;
+						}
+						
+				}
+				if(playerNear)
+					break;
+			}
+			if(playerNear)
+				break;
+		}
+		
+		return playerNear;
 	}
 	
 	public ArrayList<Coordinate> possibleMovments(){
@@ -34,9 +113,6 @@ public class NonPlayableCharacter extends DefaultCharacter implements MapConstan
 		return possibleMovments;
 	}
 	
-	public void dropItem(){
-		
-	}
 	
 	/*public int evaluate(){
 		int distance;
@@ -91,4 +167,5 @@ public class NonPlayableCharacter extends DefaultCharacter implements MapConstan
 		
 	}*/
 	
+
 }

@@ -5,7 +5,24 @@ public class Weapon implements OffensiveGear{
 	private Stat mastery;
 	private Stat impact;
 	private String name;
+	private String type;
 	
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setMastery(Stat mastery) {
+		this.mastery = mastery;
+	}
+
+	public void setImpact(Stat impact) {
+		this.impact = impact;
+	}
+
 	public Weapon(){
 		mastery= new Stat(0, "");
 		impact= new Stat(0, "");
@@ -16,6 +33,7 @@ public class Weapon implements OffensiveGear{
 		this.mastery= new Stat(mastery, "Maniabilité");
 		this.impact= new Stat(impact, "Impacte");
 		setName(name);
+		this.type = "Arme.";
 		//this.hand = BOTH_HANDS;
 	}
 	
@@ -64,10 +82,10 @@ public class Weapon implements OffensiveGear{
 	}
 	
 	public String toString(){
-		String weapon = getName() + "\n" + 
-						"    Statistiques: \n" +
-						"        Maniabilite: " + mastery + "\n" +
-						"        Impact: " + impact + "\n" +
+		String weapon = getName() + ";" + 
+						"    Statistiques: ;" +
+						"        Maniabilite: " + mastery + ";" +
+						"        Impact: " + impact + ";" +
 						"    Arme.";
 						/*"        Main: ";
 		switch(hand){
@@ -86,18 +104,23 @@ public class Weapon implements OffensiveGear{
 				
 	}
 	
-	public void use(PlayableCharacter user){
+	public int use(PlayableCharacter user){
 		Weapon userRightHand = (Weapon) user.getStuff().getMainHand();
-		if(userRightHand != null)
-			user.getInventory().add(userRightHand);
-		
-		if(!this.equals(userRightHand)){
-			user.getInventory().remove(this);
-			user.getStuff().setMainHand(this);
+		if(user.getPa() - PA_TO_EQUIP >= 0){
+			if(userRightHand != null)
+				user.getInventory().add(userRightHand);
+			
+			if(!this.equals(userRightHand)){
+				user.getInventory().remove(this);
+				user.getStuff().setMainHand(this);
+			}
+			else{
+				user.getStuff().setMainHand(null);
+			}
+			user.subToPa(PA_TO_EQUIP);
+			return SUCCESS;
 		}
-		else{
-			user.getStuff().setMainHand(null);
-		}
+		return MISSING_PA;
 	}
 
 	

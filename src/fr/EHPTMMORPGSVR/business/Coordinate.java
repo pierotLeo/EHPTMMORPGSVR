@@ -1,20 +1,42 @@
 package fr.EHPTMMORPGSVR.business;
 
-public class Coordinate {
-	int x;
-	int y;
+import java.io.Serializable;
+
+public class Coordinate implements Comparable, MapConstants{
+	private int x;
+	private int y;
 	
 	public Coordinate(){
 	}
 	
 	public Coordinate(int x, int y){
-		this.x = x; 
-		this.y = y;
+		if(x>=0)
+			this.x = x;
+		else 
+			this.x = 0;
+		if(y >= 0)
+			this.y = y;
+		else
+			this.y = 0;
 	}
 	
 	public Coordinate(Coordinate coordinate){
 		x = coordinate.getX();
 		y = coordinate.getY();
+	}
+	
+	public int compareTo(Object o){
+		if(o instanceof Coordinate){
+			Coordinate toCompare = (Coordinate) o;
+			if(toCompare.getFullValue() > this.getFullValue())
+				return -1;
+			else if(toCompare.getFullValue() == this.getFullValue())
+				return 0;
+			else
+				return 1;
+		}
+		
+		return 0;
 	}
 	
 	public boolean contains(Coordinate content){
@@ -29,6 +51,10 @@ public class Coordinate {
 	
 	public int getY(){
 		return y;
+	}
+	
+	public int getFullValue(){
+		return x*MAP_WIDTH + y;
 	}
 	
 	public int getIncrementedX(int value){
@@ -55,6 +81,19 @@ public class Coordinate {
 	
 	public void setY(int y){
 		this.y = y;
+	}
+	
+	public boolean equals(Object o){
+		if(o instanceof Coordinate){
+			Coordinate toCompare = (Coordinate) o;
+			if(this.x == toCompare.x && this.y == toCompare.y)
+				return true;
+		}
+		return false;
+	}
+
+	public String toString(){
+		return "Coordonnées : \n       x = " + x + "\n       y = " + y;
 	}
 	
 }

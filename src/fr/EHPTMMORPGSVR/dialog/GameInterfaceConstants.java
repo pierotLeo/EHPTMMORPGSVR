@@ -5,6 +5,7 @@ public interface GameInterfaceConstants {
 	public static final int ATTACK = 1;
 	public static final int MENU = 2;
 	public static final int SAVE = 3;
+	public static final int LOAD = 4;
 	public static final int MOVE_LEFT = 4;
 	public static final int MOVE_RIGHT = 5;
 	public static final int MOVE_UP = 6;

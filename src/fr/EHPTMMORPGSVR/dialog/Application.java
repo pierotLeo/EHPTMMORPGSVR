@@ -14,8 +14,11 @@ public class Application {
 		PlayableCharacter player = new PlayableCharacter("Rolex", 0, 5, 4, 3, map);
 		player.setAvailableXp(200);
 		NonPlayableCharacter mob1 = new NonPlayableCharacter("Gobelin", 600, 6, 6, 6, 6, 6, map);
-		NonPlayableCharacter[] mobs = new NonPlayableCharacter[1];
+		NonPlayableCharacter mob2 = new NonPlayableCharacter("Gobelin", 600, 6, 6, 6, 6, 6, map);
+		mob1.setTarget(player);
+		NonPlayableCharacter[] mobs = new NonPlayableCharacter[2];
 		mobs[0] = mob1;
+		mobs[1] = mob2;
 		GameEngine game = new GameEngine(player, mobs);
 		Weapon loklak = new Weapon("LokLak, ténèbres des temps anciens", 7, 7);///, game.LEFT_HAND);
 		Weapon pongdoh = new Weapon("Pongk'dohr, le marteleur planétaire", 9, 9);//, game.RIGHT_HAND);
@@ -26,7 +29,9 @@ public class Application {
 		map.randomSetOnItemGrid(pongdoh);
 		map.randomSetOnItemGrid(chitine);
 		map.randomSetOnItemGrid(skin);
-		
-		GameWindow window = new GameWindow("Meuporg", game);
+			
+
+			
+		//GameWindow window = new GameWindow("Meuporg", player);
 	}
 }

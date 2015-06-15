@@ -1,8 +1,9 @@
 package fr.EHPTMMORPGSVR.business;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Inventory extends ArrayList<Item> implements CharacterConstants{
+public class Inventory extends ArrayList<Item> implements CharacterConstants, Serializable{
 	/**
 	 * 
 	 */
@@ -14,7 +15,7 @@ public class Inventory extends ArrayList<Item> implements CharacterConstants{
 	}
 	
 	public boolean add(Item item){
-		if(size() < maximumCapacity){
+		if(size() < maximumCapacity && item != null){
 			return super.add(item);
 		}
 		return false;
@@ -43,17 +44,25 @@ public class Inventory extends ArrayList<Item> implements CharacterConstants{
 	public String toString(){
 		String inventory = "";
 		
-		for(int i=0; i<size(); i++){
+		/*for(int i=0; i<size(); i++){
 			if(i%4 == 0)
-				inventory += "\n";
+				inventory += ";";
 			try{
-				inventory += "|" + get(i).getName() + "|";
+				inventory += get(i).getName() + "|";
 			}
 			catch (IndexOutOfBoundsException e){
 				inventory += "|     |";
 			}
 			catch(NullPointerException e){
 				inventory += "|     |";
+			}
+		}*/
+		for(int i=0; i<INVENTORY_CAPACITY; i++){
+			try{
+				inventory += get(i).getName() + ";";
+				
+			}catch(IndexOutOfBoundsException e){
+				inventory += " ;";
 			}
 		}
 		return inventory;

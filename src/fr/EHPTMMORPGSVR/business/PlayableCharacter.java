@@ -1,5 +1,7 @@
 package fr.EHPTMMORPGSVR.business;
 
+import java.io.Serializable;
+
 public class PlayableCharacter extends DefaultCharacter implements StuffConstants{
 	private Stat[] characteristics;
 	private Stuff stuff;
@@ -14,6 +16,25 @@ public class PlayableCharacter extends DefaultCharacter implements StuffConstant
 		characteristics[AGILITY]=new Stat(agility, "Agilité");
 		characteristics[RESISTANCE]=new Stat(resistance, "Résistance");
 		stuff = new Stuff(this);
+	}
+	
+	public PlayableCharacter(String name, int level, int strength, int agility, int resistance){
+		super(name,level, agility, agility, agility, resistance, strength);
+		characteristics = new Stat[3];
+		characteristics[STRENGTH]=new Stat(strength, "Force");
+		characteristics[AGILITY]=new Stat(agility, "Agilité");
+		characteristics[RESISTANCE]=new Stat(resistance, "Résistance");
+		stuff = new Stuff(this);
+	}
+	
+	public PlayableCharacter(String name, int level, int strength, int agility, int resistance, int id){
+		super(name,level, agility, agility, agility, resistance, strength);
+		characteristics = new Stat[3];
+		characteristics[STRENGTH]=new Stat(strength, "Force");
+		characteristics[AGILITY]=new Stat(agility, "Agilité");
+		characteristics[RESISTANCE]=new Stat(resistance, "Résistance");
+		stuff = new Stuff(this);
+		setId(id);
 	}
 	
 	public PlayableCharacter (String name, int xp, int init, int hit, int dodge, int def, int dmg, Map map){
@@ -181,6 +202,16 @@ public class PlayableCharacter extends DefaultCharacter implements StuffConstant
 		return ((double)target.getTotalXp())/((double)getTotalXp());
 	}
 	
+	public void dropTo(DefaultCharacter winner){
+		super.dropTo(winner);
+		for(int i = 0; i < NUMBER_OF_PROTECTIONS; i++){
+			winner.getInventory().add(stuff.getArmors(i));
+		}
+		winner.getInventory().add(stuff.getMainHand());
+		winner.getInventory().add(stuff.getOffHand());
+		
+	}
+	
 	//redéfinition de la méthode mére pour prendre en compte l'armure du personnage joueur dans le lancé de dés
 	/*public int roll(int ability){
 		int tmp = 0;
@@ -336,6 +367,10 @@ public class PlayableCharacter extends DefaultCharacter implements StuffConstant
 			
 			if(!target.isAlive()){
 				addToAllXp(xpFromVictory(target, xpFromCurrentFight));
+				if(target instanceof PlayableCharacter)
+					getMap().getDeadList().add(target);
+				target.dropTo(this);
+				this.setTarget(null);
 				getMap().setOnCharactersGrid(null, getMap().getCoordinate(target).getX(), getMap().getCoordinate(target).getY());
 			}
 			return damage;
@@ -345,7 +380,7 @@ public class PlayableCharacter extends DefaultCharacter implements StuffConstant
 	}
 	
 	public int attack(DefaultCharacter target){
-		if (target.isAlive())
+		if (target.isAlive() && injuryLevel() != COMA)
 			if(getMap().isNextTo(this, target)){
 				if(getPa() >= PA_TO_ATTACK){
 					subToPa(PA_TO_INITIATE);
@@ -365,29 +400,33 @@ public class PlayableCharacter extends DefaultCharacter implements StuffConstant
 		return ERROR;
 	}
 	
+	public String getPlayerStatus(){
+		return "Nom : " + getName() + ";Santé : " + getInjuryLevel() + ";Points d'action : " + getPa() + ";Expérience disponible : " + availableXp + ";Expérience Totale : " + getTotalXp();
+	}
+	
 	public String toString(){
-		String PC=super.toString() + "\n";
+		String PC=super.toString() + ";";
 		
 		if(stuff != null){
-				PC+="Capacites:\n" + 
-           		"    Score d'initiative: " + getAbility(INITIATIVE) + "\n" +
-           		"    Score de toucher: " + getAbility(HIT) + "\n" +
-           		"    Score d'esquive: " + getAbility(DODGE) + "\n" +
-           		"    Score de defense: " +getAbility(DEFENSE) + "\n" +
-           		"    Score d'attaque: " + getAbility(DAMAGE) + "\n" + 
-					"Caracteristiques:\n" +
-						"    Score de force: " + characteristics[STRENGTH] + "\n" +
-						"    Score d'adresse: " + characteristics[AGILITY] + "\n" +
-						"    Score de resistance: " + characteristics[RESISTANCE] + "\n\n" +
-				"Armure : \n" +
-				"    Tete: " + stuff.getArmors(HEAD) + "\n" + 
-				"    Torse: " + stuff.getArmors(TORSO) + "\n" +
-				"    Mains: " + stuff.getArmors(HANDS) + "\n" +
-				"    Jambes: " + stuff.getArmors(LEGS) + "\n" + 
-				"    Pieds: " + stuff.getArmors(FEET) + "\n\n" +
-				"Armes : \n" + 
-				"    Main droite: " + stuff.getMainHand() + "\n" + 
-				"    Main Gauche: " + stuff.getOffHand() + "\n\n";
+				PC+="Capacites:;" + 
+           		"    Score d'initiative: " + getAbility(INITIATIVE) + ";" +
+           		"    Score de toucher: " + getAbility(HIT) + ";" +
+           		"    Score d'esquive: " + getAbility(DODGE) + ";" +
+           		"    Score de defense: " +getAbility(DEFENSE) + ";" +
+           		"    Score d'attaque: " + getAbility(DAMAGE) + ";" + 
+					"Caracteristiques:;" +
+						"    Score de force: " + characteristics[STRENGTH] + ";" +
+						"    Score d'adresse: " + characteristics[AGILITY] + ";" +
+						"    Score de resistance: " + characteristics[RESISTANCE] + ";;" +
+				"Armure : ;" +
+				"    Tete: " + stuff.getArmors(HEAD) + ";" + 
+				"    Torse: " + stuff.getArmors(TORSO) + ";" +
+				"    Mains: " + stuff.getArmors(HANDS) + ";" +
+				"    Jambes: " + stuff.getArmors(LEGS) + ";" + 
+				"    Pieds: " + stuff.getArmors(FEET) + ";" +
+				"Armes : ;" + 
+				"    Main droite: " + stuff.getMainHand() + ";" + 
+				"    Main Gauche: " + stuff.getOffHand() + ";";
 		}
 		return PC;
 	}

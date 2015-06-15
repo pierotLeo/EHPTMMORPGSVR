@@ -1,8 +1,9 @@
 package fr.EHPTMMORPGSVR.business;
 
+import java.io.Serializable;
 import java.sql.Date;
 
-public class DefaultCharacter implements CharacterConstants, GlobalConstants{
+public class DefaultCharacter implements CharacterConstants, GlobalConstants, Serializable, MapConstants, StuffConstants{
 	
 	private Stat[] abilities;
 	private String name;
@@ -14,6 +15,7 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 	private int lineOfSight;
 	private Map map;
 	private DefaultCharacter target;
+	private int id;
 	
 	public DefaultCharacter(Map map){
 		this("", 0, 0, 0, 0, 0, 0, map);
@@ -46,8 +48,28 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 		dla = System.currentTimeMillis();
 		inventory = new Inventory(this);
 		this.map = map;
-		Thread chrono = new Thread(new Chrono(this));
-		chrono.start();
+		//Thread chrono = new Thread(new ChronoDLA(this));
+		//chrono.start();
+	}
+	
+	public DefaultCharacter (String name, int xp, int init, int hit, int dodge, int def, int dmg){
+		this.name = name;
+		this.totalXp = xp;
+		
+		abilities = new Stat[NUMBER_OF_ABILITIES];
+		abilities[INITIATIVE] = new Stat(init, "Initiative");
+		abilities[HIT] = new Stat(hit, "Toucher");
+		abilities[DODGE] = new Stat(dodge, "Esquive");
+		abilities[DEFENSE] = new Stat(def, "Défense");
+		abilities[DAMAGE] = new Stat(dmg, "Dégâts");
+		
+		currentHp = MAX_HEALTH;
+		pa = DEFAULT_PA;
+		lineOfSight = DEFAULT_LOS;
+		dla = System.currentTimeMillis();
+		inventory = new Inventory(this);
+		//Thread chrono = new Thread(new ChronoDLA(this));
+		//chrono.start();
 	}
 	
 	public void addToPa(int pa){
@@ -61,6 +83,13 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 		totalXp += xp;
 	}
 	
+	public int getId(){
+		return id;
+	}
+	
+	public void setId(int id){
+		this.id = id;
+	}
 	
 	public Stat getAbility(int abilitie){
 		return abilities[abilitie];
@@ -86,25 +115,25 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 		String character = "";
 		switch(injuryLevel()){
 		case DEATH: 
-			character+= " Shindeimasuuu. \n";
+			character+= " Shindeimasuuu. ";
 			break;
 		case COMA:
-			character+= " Inconscient. \n";
+			character+= " Inconscient. ";
 			break;
 		case SERIOUS_INJURY:
-			character+= " Gravement blesse. \n";
+			character+= " Gravement blesse. ";
 			break;
 		case INJURY:
-			character+= " Blesse. \n";
+			character+= " Blesse. ";
 			break;
 		case LIGHT_INJURY:
-			character+= " Legerement blesse. \n";
+			character+= " Legerement blesse. ";
 			break;
 		case SUPERFICIAL_INJURY:
-			character+= " Blessures superficielles. \n";
+			character+= " Blessures superficielles. ";
 			break;
 		case NO_INJURY:
-			character+= " Supa Genki! \n";
+			character+= " Supa Genki! ";
 			break;
 		}
 		return character;
@@ -171,6 +200,12 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 		return injuryLevel() > DEATH;
 	}
 	
+	public void dropTo(DefaultCharacter winner){
+		for(int i =0; i<inventory.size(); i++){
+			winner.getInventory().add(inventory.get(i));
+		}
+	}
+	
 	//retourne un lancé de dé de la stat souhaitée.
 	public int roll(int stat){
 		return abilities[stat].rollDice();
@@ -215,10 +250,10 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 	
 	public String toString(){
 		
-		String character = "Nom : " + name + "\n" +
+		String character = "Nom : " + name + ";" +
 				           //"Jauge de vie: " + currentHp + "/" + MAX_HEALTH + "\n" +
-				           "Sante :" + getInjuryLevel() + "\n" +
-				           "Experience : " + totalXp + "\n" ;
+				           "Sante :" + getInjuryLevel() + ";" +
+				           "Experience : " + totalXp + ";" ;
 				
 		return character;
 	}
@@ -269,10 +304,69 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 		return MISS;
 	}*/
 	
+	public DefaultCharacter getOnMap(int position){
+		DefaultCharacter toGet = null;
+		int x = map.getCoordinate(this).getX();
+		int y = map.getCoordinate(this).getY();
+		
+		switch(position){
+			case LEFT:
+				if(x-1>=0 && y>=0 && x-1<MAP_WIDTH && y<MAP_HEIGHT)
+					toGet = map.getOnCharactersGrid(x-1, y);
+				break;
+			case RIGHT:
+				if(x+1>=0 && y>=0 && x+1<MAP_WIDTH && y<MAP_HEIGHT)
+					toGet = map.getOnCharactersGrid(x+1, y);
+				break;
+			case UP:
+				if(x>=0 && y-1>=0 && x<MAP_WIDTH && y-1<MAP_HEIGHT)
+					toGet = map.getOnCharactersGrid(x, y-1);
+				break;
+			case DOWN:
+				if(x>=0 && y+1>=0 && x<MAP_WIDTH && y+1<MAP_HEIGHT)
+					toGet = map.getOnCharactersGrid(x, y+1);
+				break;
+		}
+		return toGet;
+	}
+	
+	public DefaultCharacter[] charactersAround(){
+		DefaultCharacter[] charactersAround = new DefaultCharacter[4];
+		
+		/*for(int i=-1; i<=1; i++){
+			for(int j=-1; j<=1; j++){
+				try{
+					if(!(Math.abs(i)==1 && Math.abs(j)==1)){
+						target = getOnCharactersGrid(initiatorLocation.getX()+j, initiatorLocation.getY()+i);
+						if(target != initiator){
+							charactersAround[cellTab] = target;
+							cellTab++;
+						}
+					}
+				}
+				catch(ArrayIndexOutOfBoundsException e){
+						
+				}
+			}
+		}
+		
+		System.out.println("tableau personnages");
+		for(int i=0; i<4; i++){
+			System.out.println(" i = " + i + " " +charactersAround[i].getName());
+		}*/
+		
+		charactersAround[0] = this.getOnMap(LEFT);
+		charactersAround[1] = this.getOnMap(UP);
+		charactersAround[2] = this.getOnMap(RIGHT);
+		charactersAround[3] = this.getOnMap(DOWN);
+	
+		return charactersAround;
+	}
+	
 	//initialise un combat avec la cible du joueur courant. Retourne le nombre de points de dégéts infligés.
 	public int attack(DefaultCharacter target){
 		int damage;
-		if (target.isAlive()){
+		if (target.isAlive() && injuryLevel() != COMA){
 			if(map.isNextTo(this, target)){
 				if(pa >= PA_TO_ATTACK){	
 					if(this.target != target){
@@ -288,8 +382,13 @@ public class DefaultCharacter implements CharacterConstants, GlobalConstants{
 							if(damage<=0)
 								return ABSORB;
 							target.takeDamage(damage);
-							if(!target.isAlive())
+							if(!target.isAlive()){
+								target.dropTo(this);
+								if(target instanceof PlayableCharacter)
+									getMap().getDeadList().add(target);
+								this.setTarget(null);
 								getMap().setOnCharactersGrid(null, getMap().getCoordinate(target).getX(), getMap().getCoordinate(target).getY());
+							}
 							return damage;
 						}
 						return MISS;

@@ -43,7 +43,7 @@ public class Test2 {
 			String request;
 			
 			while(true){
-				System.out.println("Attaquer : 12.\nSe déplacer : 13.\n\n");
+				System.out.println("Attaquer : 12.\nSe déplacer : 13.\nRécupérer Personnage : 15\nAfficher map personnage : 1\n\n");
 				choice = input.nextInt();
 				request = String.valueOf(choice);
 				switch(choice){
@@ -54,14 +54,24 @@ public class Test2 {
 						//System.out.println("request" + request);
 						toServer.println(request);
 						
+						System.out.println(fromServer.readLine());
 						break;
 					case ServerConstants.ATTACK:
+						break;
+					case ServerConstants.GET_CHARACTER:
+						toServer.println(ServerConstants.GET_CHARACTER);
+						player = (PlayableCharacter) clientUpdate.readObject();
+						System.out.println(fromServer.readLine());
+						break;
+					case 8:
+						System.out.println(player.getMap());
+						
+						
 						
 				}
 				
-				System.out.println(fromServer.readLine());
-				for(int i=0; i<=Map.MAP_WIDTH; i++)
-					System.out.println(fromServer.readLine());
+				//for(int i=0; i<=Map.MAP_WIDTH; i++)
+					//System.out.println(fromServer.readLine());
 			}
 			
 			
@@ -69,7 +79,7 @@ public class Test2 {
 			//client.close();*/
 			
 		}catch(IOException e){e.printStackTrace();}
-		//catch(ClassNotFoundException e){e.printStackTrace();}
+		catch(ClassNotFoundException e){e.printStackTrace();}
 	}
 	
 }

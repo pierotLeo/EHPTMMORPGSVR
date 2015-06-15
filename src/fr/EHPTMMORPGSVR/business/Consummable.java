@@ -1,5 +1,7 @@
 package fr.EHPTMMORPGSVR.business;
 
+import java.io.Serializable;
+
 public abstract class Consummable implements Item, CharacterConstants{
 	public String name;
 	

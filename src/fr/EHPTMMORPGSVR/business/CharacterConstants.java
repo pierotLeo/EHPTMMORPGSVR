@@ -1,5 +1,7 @@
 package fr.EHPTMMORPGSVR.business;
 
+import java.io.Serializable;
+
 /**
  * Interface contenant 	:- les niveaux de vie du personnage.
  * 						:- les valeurs mnémoniques des capacités du personnage.
@@ -7,7 +9,7 @@ package fr.EHPTMMORPGSVR.business;
  * 						:- 
  *
  */
-public interface CharacterConstants {
+public interface CharacterConstants{
 	//health levels
 	/**
 	 * Vie maximale d'un personnage.
@@ -54,12 +56,13 @@ public interface CharacterConstants {
 	public static final int PA_TO_USE_LEGS = 2;
 	public static final int PA_TO_USE_FEET = 1;
 	public static final int PA_TO_USE_CONSUMABLE = 1;
+	public static final int PA_TO_CHANGE_HAND = 3;
 	
 	//XP 
 	public static final int XP_PER_HIT = 1;
 	
 	//LOS
-	public static final int DEFAULT_LOS = 2;
+	public static final int DEFAULT_LOS = 4;
 	
 	public static final boolean UNEQUIP_GEAR = true;
 	public static final boolean EQUIP_GEAR = false;

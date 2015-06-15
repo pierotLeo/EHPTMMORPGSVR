@@ -1,4 +1,7 @@
 package fr.EHPTMMORPGSVR.business;
+
+import java.io.Serializable;
+
 /**
  * Classe héritant de Gear.
  * Définit contenu et comportement d'une armure équipable par un personnage joueur.
@@ -6,6 +9,31 @@ package fr.EHPTMMORPGSVR.business;
  */
 public class Armor implements DefensiveGear{
 	private int armorPiece;
+	private String type;
+	public int getArmorPiece() {
+		return armorPiece;
+	}
+
+	public void setArmorPiece(int armorPiece) {
+		this.armorPiece = armorPiece;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setBurden(Stat burden) {
+		this.burden = burden;
+	}
+
+	public void setSolidity(Stat solidity) {
+		this.solidity = solidity;
+	}
+
 	private Stat burden;
 	private Stat solidity;
 	private String name;
@@ -43,6 +71,23 @@ public class Armor implements DefensiveGear{
 		this.solidity= new Stat(solidity, "Solidité");
 		setName(name);
 		this.armorPiece = armorPiece;
+		switch(armorPiece){
+		case HEAD:
+			this.type = "Casque.";
+			break;
+		case TORSO:
+			this.type = "Torse.";
+			break;
+		case HANDS:
+			this.type = "Gants.";
+			break;
+		case LEGS:
+			this.type = "Jambières.";
+			break;
+		case FEET:
+			this.type = "Bottes.";
+			break;
+	}
 	}
 	
 	/**
@@ -91,27 +136,12 @@ public class Armor implements DefensiveGear{
 	 * 
 	 */
 	public String toString(){
-		String armor = getName() + "\n" + 
-					"    Statistiques: \n" +
-					"        Encombrement: " + burden + "\n" +
-					"        Solidite: " + solidity + "\n\n" ;
-		switch(armorPiece){
-			case HEAD:
-				armor += "    Casque.";
-				break;
-			case TORSO:
-				armor += "    Torse.";
-				break;
-			case HANDS:
-				armor += "    Gants.";
-				break;
-			case LEGS:
-				armor += "    Jambières.";
-				break;
-			case FEET:
-				armor += "    Bottes.";
-				break;
-		}
+		String armor = getName() + ";" +
+					"    Statistiques: ;" +
+					"        Encombrement: " + burden + ";" +
+					"        Solidite: " + solidity + ";" ;
+		armor += type;
+		
 		return armor;
 	}
 	
@@ -120,25 +150,30 @@ public class Armor implements DefensiveGear{
 	 * 
 	 * @param user : personnage sur lequel utiliser l'armure.
 	 */
-	public void use(PlayableCharacter user){
-		Armor armor = user.getStuff().getArmors(armorPiece);
-		if(armor!=null){
-			user.getInventory().add(user.getStuff().getArmors(armorPiece));
+	public int use(PlayableCharacter user){
+		DefensiveGear armor = user.getStuff().getArmors(armorPiece);
+		if(user.getPa() - PA_TO_EQUIP >= 0){
+			if(armor!=null){
+				user.getInventory().add(user.getStuff().getArmors(armorPiece));
+			}
+			
+			if(!this.equals(user.getStuff().getArmors(armorPiece))){
+				user.getInventory().remove(this);
+				user.getStuff().setArmors(this, armorPiece);
+				//user.setAbility(INITIATIVE, user.getAbility(INITIATIVE).sub(burden, EQUIP_GEAR));
+				//user.setAbility(DODGE, user.getAbility(DODGE).sub(burden, EQUIP_GEAR));
+				//user.setAbility(DEFENSE, user.getAbility(DEFENSE).sum(solidity, EQUIP_GEAR));
+			}
+			else{
+				user.getStuff().setArmors(null, armorPiece);
+				//user.setAbility(INITIATIVE, user.getAbility(INITIATIVE).sum(burden, UNEQUIP_GEAR));
+				//user.setAbility(DODGE, user.getAbility(DODGE).sum(burden, UNEQUIP_GEAR));
+				//user.setAbility(DEFENSE, user.getAbility(DEFENSE).sub(solidity, UNEQUIP_GEAR));
+			}
+			user.subToPa(PA_TO_EQUIP);
+			return SUCCESS;
 		}
-		
-		if(!this.equals(user.getStuff().getArmors(armorPiece))){
-			user.getInventory().remove(this);
-			user.getStuff().setArmors(this, armorPiece);
-			//user.setAbility(INITIATIVE, user.getAbility(INITIATIVE).sub(burden, EQUIP_GEAR));
-			//user.setAbility(DODGE, user.getAbility(DODGE).sub(burden, EQUIP_GEAR));
-			//user.setAbility(DEFENSE, user.getAbility(DEFENSE).sum(solidity, EQUIP_GEAR));
-		}
-		else{
-			user.getStuff().setArmors(null, armorPiece);
-			//user.setAbility(INITIATIVE, user.getAbility(INITIATIVE).sum(burden, UNEQUIP_GEAR));
-			//user.setAbility(DODGE, user.getAbility(DODGE).sum(burden, UNEQUIP_GEAR));
-			//user.setAbility(DEFENSE, user.getAbility(DEFENSE).sub(solidity, UNEQUIP_GEAR));
-		}
+		return MISSING_PA;
 	}
 	
 

@@ -1,20 +1,46 @@
 package fr.EHPTMMORPGSVR.business;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Map implements MapConstants, CharacterConstants, GlobalConstants{
+public class Map implements MapConstants, CharacterConstants, GlobalConstants, Serializable{
 	private DefaultCharacter[][] charactersGrid;
 	private Item[][] itemGrid;
 	private Obstacle[][] obstacleGrid;
 	private long period;
+	private int npcNumber;
+	private ArrayList<DefaultCharacter> deadList;
+
 	
 	public Map(){
 		charactersGrid = new DefaultCharacter[MAP_WIDTH][MAP_HEIGHT];
 		itemGrid = new Item[MAP_WIDTH][MAP_HEIGHT];	
 		obstacleGrid = generateObstacleGrid();
 		period = DEFAULT_PERIOD;
+		deadList = new ArrayList<DefaultCharacter>();
+		npcNumber = 0;
+		//Thread npcPop = new Thread(new NpcPopHandler(this));
+		//npcPop.start();
+		Thread chronoDla = new Thread(new ChronoDLA(this));
+		chronoDla.start();
+	}
+	
+	public ArrayList<DefaultCharacter> getDeadList(){
+		return deadList;
+	}
+	
+	public Item[][] getItemGrid(){
+		return itemGrid;
+	}
+	
+	public int getNpcNumber(){
+		return npcNumber;
+	}
+	
+	public DefaultCharacter[][] getCharactersGrid(){
+		return charactersGrid;
 	}
 	
 	public long getPeriod(){
@@ -23,14 +49,48 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 	
 	public static Obstacle[][] generateObstacleGrid(){
 		Obstacle[][] obstacleGrid =  new Obstacle[MAP_WIDTH][MAP_HEIGHT];
-		for(int i=0; i<MAP_WIDTH; i++){
+		/*for(int i=0; i<MAP_WIDTH; i++){
 			for(int j=0; j<MAP_HEIGHT; j++){
 				if(i%2==0 && j%2==0){
 					obstacleGrid[i][j] = new Obstacle();
 				}
 			}
-		}
+		}*/
+		obstacleGrid[4][5] = new Obstacle();
+		obstacleGrid[3][5] = new Obstacle();
+		obstacleGrid[2][5] = new Obstacle();
+		obstacleGrid[1][5] = new Obstacle();
+		obstacleGrid[5][4] = new Obstacle();
+		obstacleGrid[5][5] = new Obstacle();
+		obstacleGrid[5][6] = new Obstacle();
+		obstacleGrid[5][7] = new Obstacle();
+		obstacleGrid[5][8] = new Obstacle();
 		return obstacleGrid;
+	}
+	
+	public Obstacle getOnObstacleGrid(int x, int y){
+		return obstacleGrid[x][y];
+	}
+	
+	public boolean contains(DefaultCharacter toCheck){
+		boolean contains = false;
+		
+		for(int x = 0; x < MAP_WIDTH; x++){
+			for(int y = 0; y < MAP_HEIGHT; y++){
+				if(charactersGrid[x][y] != null){
+					if(charactersGrid[x][y].equals(toCheck)){
+						contains = true;
+						break;
+					}
+				}
+				if(contains)
+					break;
+			}
+			if(contains)
+				break;
+		}
+		
+		return contains;
 	}
 	
 	public Coordinate getCoordinate(DefaultCharacter target){
@@ -53,7 +113,7 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 			for(int j = 0; j < MAP_HEIGHT; j++){
 				if(charactersGrid[i][j] instanceof NonPlayableCharacter){
 					NonPlayableCharacter mob = (NonPlayableCharacter) charactersGrid[i][j];
-					//mob.activateAI();
+					mob.getNpcBrain().start();
 				}
 			}
 		}
@@ -63,30 +123,48 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 		return charactersGrid[x][y];
 	}
 	
+	public DefaultCharacter getOnCharactersGrid(DefaultCharacter toGet){
+		DefaultCharacter update = null;
+		
+		for(int x = 0; x < MAP_WIDTH; x++){
+			for(int y = 0; y < MAP_HEIGHT; y++){
+				if(charactersGrid[x][y] != null){
+					if(charactersGrid[x][y].equals(toGet)){
+						update = charactersGrid[x][y];
+						break;
+					}
+				}
+				if(update != null)
+					break;
+			}
+			if(update != null)
+				break;
+		}
+		
+		return update;
+	}
+	
 	public boolean isEmpty(int x, int y){
 		return (charactersGrid[x][y] == null && obstacleGrid[x][y] == null && itemGrid[x][y] == null);
 	}
 	
 	public int move(DefaultCharacter player, int direction){
-		int move = 0;
+		int move = IMMOBILIZED;
 		
-		if(player.getPa() >= PA_TO_MOVE){
+		if(player.getPa() >= PA_TO_MOVE && player.injuryLevel() != COMA){
+			
 			switch(direction){
 				case UP:
 					move = moveToCoordinate(player, -1, 0);
-					System.out.println("HAUT hihi");
 					break;
 				case DOWN:
 					move = moveToCoordinate(player, 1, 0);
-					System.out.println("BAS hihi");
 					break;
 				case LEFT:
 					move = moveToCoordinate(player, 0, -1);
-					System.out.println("GAUCHE hihi");
 					break;
 				case RIGHT:
 					move = moveToCoordinate(player, 0, 1);
-					System.out.println("DROITE hihi");
 					break;
 			}
 		}
@@ -140,10 +218,17 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 		return false;
 	}*/
 	
-	public void randomSetOnCharactersGrid(DefaultCharacter character){
+	public void randomSetOnCharactersGrid(PlayableCharacter character){
 		Coordinate roll = randomEmptyCoordinates();
+		//System.out.println("x = " + roll.getX() + "   y = " + roll.getY());
 		this.charactersGrid[roll.getX()][roll.getY()] = character;
 		//activateAI();
+	}
+	
+	public void randomSetOnCharactersGrid(NonPlayableCharacter character){
+		Coordinate roll = randomEmptyCoordinates();
+		this.charactersGrid[roll.getX()][roll.getY()] = character;
+		npcNumber++;
 	}
 	
 	public void randomSetOnItemGrid(Item item){
@@ -165,60 +250,36 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 		for(int i=0; i<MAP_WIDTH; i++){
 			for(int j=0; j<MAP_HEIGHT; j++){
 				if(charactersGrid[i][j] != null){
-					if(charactersGrid[i][j] instanceof PlayableCharacter)
-						map += " p ";
-					else 
-						map += " n ";
+					map += charactersGrid[i][j].getName() + ",";
 				}
 				else if(itemGrid[i][j] != null){
-						map += " i ";
+						map += "i,";
 				}
 				else if(obstacleGrid[i][j] != null){
-					map += " x ";
+					map += "x,";
 				}
 				else
-					map += " - ";	
+					map += "-,";	
 			}
-			map += "\n";
+			map += ";";
 		}
 		return map;
 	}
 	
 	public Object getOnGrid(int x, int y){
-		if(charactersGrid[x][y] != null)
-			return charactersGrid[x][y];
-		if(itemGrid[x][y] != null)
-			return itemGrid[x][y];
-		if(obstacleGrid[x][y] != null)
-			return obstacleGrid[x][y];
+		
+		if(x>=0 && x<MAP_WIDTH && y>=0 && y<MAP_HEIGHT){
+			if(charactersGrid[x][y] != null)
+				return charactersGrid[x][y];
+			if(itemGrid[x][y] != null)
+				return itemGrid[x][y];
+			if(obstacleGrid[x][y] != null)
+				return obstacleGrid[x][y];
+		}
 		return null;
 	}
 	
-	public ArrayList<DefaultCharacter> charactersAround(DefaultCharacter initiator){
-		DefaultCharacter target;
-		ArrayList<DefaultCharacter> charactersAround = new ArrayList<DefaultCharacter>();
-		Coordinate initiatorLocation = new Coordinate(this.getCoordinate(initiator));
-		
-		for(int i=-1; i<=1; i++){
-			for(int j=-1; j<=1; j++){
-				try{
-					if(!(Math.abs(i)==1 && Math.abs(j)==1)){
-						target = getOnCharactersGrid(initiatorLocation.getX()+j, initiatorLocation.getY()+i);
-						if(target != null && target != initiator)
-							charactersAround.add(target);
-					}
-				}
-				catch(NullPointerException e){
-					
-				}
-				catch(ArrayIndexOutOfBoundsException e){
-						
-				}
-			}
-		}
 	
-		return charactersAround;
-	}
 	
 	/*public DefaultCharacter characterAround(DefaultCharacter initiator){
 		DefaultCharacter target = null;
@@ -247,12 +308,34 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 	public boolean isNextTo(DefaultCharacter initiator, DefaultCharacter target){
 		Coordinate charaLocation = getCoordinate(initiator);
 		Coordinate targetLocation = getCoordinate(target);
-		boolean left = (targetLocation.getX()+1 == charaLocation.getX() && targetLocation.getY() == charaLocation.getY());
-		boolean right = (targetLocation.getX()-1 == charaLocation.getX() && targetLocation.getY() == charaLocation.getY());
-		boolean up = (targetLocation.getY()-1 == charaLocation.getY() && targetLocation.getX() == targetLocation.getX());
-		boolean down = (targetLocation.getY()+1 == charaLocation.getY() && targetLocation.getX() == charaLocation.getX());
+		boolean left = (targetLocation.getX()-1 == charaLocation.getX() && targetLocation.getY() == charaLocation.getY());
+		boolean right = (targetLocation.getX()+1 == charaLocation.getX() && targetLocation.getY() == charaLocation.getY());
+		boolean up = (targetLocation.getY()+1 == charaLocation.getY() && targetLocation.getX() == charaLocation.getX());
+		boolean down = (targetLocation.getY()-1 == charaLocation.getY() && targetLocation.getX() == charaLocation.getX());
 		
 		return left || right || up || down;
+	}
+	
+	public boolean isNextTo(Coordinate initiator, Coordinate target){
+		boolean left = (target.getX()-1 == initiator.getX() && target.getY() == initiator.getY());
+		boolean right = (target.getX()+1 == initiator.getX() && target.getY() == initiator.getY());
+		boolean up = (target.getY()+1 == initiator.getY() && target.getX() == initiator.getX());
+		boolean down = (target.getY()-1 == initiator.getY() && target.getX() == initiator.getX());
+		
+		return left || right || up || down;
+	}
+	
+	public ArrayList<Coordinate> cellsNextTo(Coordinate curCell){
+		ArrayList<Coordinate> nextTo = new ArrayList<Coordinate>();
+		
+		for(int i=-1; i<2; i+=2){
+			nextTo.add(new Coordinate(curCell.getX() + i, curCell.getY()));
+		}
+		for(int i=-1; i<2; i+=2){
+			nextTo.add(new Coordinate(curCell.getX(), curCell.getY() + i));
+		}
+		
+		return nextTo;
 	}
 	
 	//!\deprecated
@@ -304,7 +387,16 @@ public class Map implements MapConstants, CharacterConstants, GlobalConstants{
 	}*/
 	
 	public boolean isAvailable(int x, int y){
-		return (charactersGrid[x][y] == null && obstacleGrid[x][y] == null);
+		if(x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT)
+			return (charactersGrid[x][y] == null && obstacleGrid[x][y] == null);
+		return false;
+	}
+	
+	public boolean isAvailable(Coordinate coordinate){
+		if(coordinate.getX() >= 0 && coordinate.getX() < MAP_WIDTH && coordinate.getY() >= 0 && coordinate.getY() < MAP_HEIGHT){
+			return(charactersGrid[coordinate.getX()][coordinate.getY()] == null && obstacleGrid[coordinate.getX()][coordinate.getY()] == null);
+		}
+		return false;
 	}
 
 	private Coordinate randomEmptyCoordinates(){

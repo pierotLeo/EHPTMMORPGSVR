@@ -1,12 +1,14 @@
 package fr.EHPTMMORPGSVR.business;
 
-public class Stuff implements StuffConstants{
+import java.io.Serializable;
+
+public class Stuff implements StuffConstants, Serializable{
 	//private OffensiveGear[] weapons;
 	private OffensiveGear mainHand;
 	private DefensiveGear offHand;
-	private Armor[] armors;
+	private DefensiveGear[] armors;
 	private int usedHand;
-	DefaultCharacter user;
+	private DefaultCharacter user;
 	
 	public Stuff(PlayableCharacter user){
 		//weapons = new OffensiveGear[2];
@@ -118,7 +120,7 @@ public class Stuff implements StuffConstants{
 		return contains;
 	}
 	
-	public Armor getArmors(int armorPiece){
+	public DefensiveGear getArmors(int armorPiece){
 		return this.armors[armorPiece];
 	}
 	
@@ -169,6 +171,48 @@ public class Stuff implements StuffConstants{
 	
 	public void setArmors(Armor armor, int armorPiece){
 		this.armors[armorPiece] = armor;
+	}
+	
+	public String toString(){
+		String stuff = "";
+		
+		for(int i=0; i<NUMBER_OF_PROTECTIONS; i++){
+			if(this.armors[i] != null)
+				stuff += this.armors[i].getName() + ";";
+			else
+				stuff += " ;";
+		}
+		
+		if(this.offHand != null)
+			stuff += this.offHand.getName() + ";";
+		else
+			stuff += " ;";
+		
+		if(this.mainHand != null)
+			stuff += this.mainHand.getName() + ";";
+		else
+			stuff += " ;";
+		
+		return stuff;
+	}
+	
+	public int changeWeapon(){
+		if(user.getPa() - user.PA_TO_CHANGE_HAND >= 0){
+			switch(usedHand){
+			case RIGHT_HAND:
+				usedHand = LEFT_HAND;
+				break;
+			case LEFT_HAND:
+				usedHand = RIGHT_HAND;
+				break;
+			}	
+			
+			user.subToPa(user.PA_TO_CHANGE_HAND);
+			
+			return usedHand;
+		}
+		return user.MISSING_PA;
+		
 	}
 	
 	/*public void setWeapons(OffensiveGear weapon, int hand){

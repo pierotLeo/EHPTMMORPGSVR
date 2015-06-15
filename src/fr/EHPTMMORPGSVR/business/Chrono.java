@@ -12,13 +12,13 @@ public class Chrono implements Runnable, CharacterConstants{
 		
 		while(character.isAlive()){
 				synchronized(this){
-					currentTimeValue = System.currentTimeMillis();
-					if(currentTimeValue >= character.getDla() + character.getMap().getPeriod()){
-				 		character.setDla(currentTimeValue);
-						character.addToPa(DEFAULT_PA + character.getAbility(INITIATIVE).intValue() + character.getPa()/2);
-						
-					}
 					try {
+						currentTimeValue = System.currentTimeMillis();
+						if(currentTimeValue >= character.getDla() + character.getMap().getPeriod()){
+					 		character.setDla(currentTimeValue);
+							character.addToPa(DEFAULT_PA + character.getAbility(INITIATIVE).intValue() + character.getPa()/2);
+							
+						}
 						wait(1000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();

@@ -1,8 +1,9 @@
 package fr.EHPTMMORPGSVR.business;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class Stat {
+public class Stat implements Serializable{
 	public static final int OPERATOR_PLUS = 1;
 	public static final int OPERATOR_MINUS = -1;
 	

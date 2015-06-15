@@ -18,11 +18,14 @@ import javax.swing.JTextArea;
 
 import fr.EHPTMMORPGSVR.business.GameEngine;
 import fr.EHPTMMORPGSVR.business.Item;
+import fr.EHPTMMORPGSVR.business.PlayableCharacter;
 
 public class ItemWindow extends JDialog implements GameInterfaceConstants{
-	private Item item;
-	private GameEngine game;
+	private String item;
 	private GameWindow owner;
+	private int index;
+	private int itemContainer;
+	private int itemSubContainer;
 	
 	class SouthButtonListener implements ActionListener{
 		int action;
@@ -34,23 +37,33 @@ public class ItemWindow extends JDialog implements GameInterfaceConstants{
 		}
 		
 		public void actionPerformed(ActionEvent e){
+			String response = "";
 			switch(action){
 				case USE:
-					game.getPlayer().use(item);
+					switch(itemContainer){
+						case WindowUpdate.INVENTORY:
+							response = WindowUpdate.GET_INVENTORY + "#" + WindowUpdate.USE_ITEM_AT + "#" + index;
+							break;
+						case WindowUpdate.STUFF:
+							response = WindowUpdate.GET_STUFF + "#" + WindowUpdate.USE_ITEM_AT + "#" + itemSubContainer + "#" + index;
+							break;
+					}
+					break;
+			/*	case DELETE:
+					if(!player.getInventory().remove(item)){
+						player.getStuff().remove(item);
+						//owner.getHistoryModel().addElement("Vous venez de supprimer " + item.getName() + " de votre inventaire.");
+					}
 					owner.update();
 					itemWindow.dispose();
-					break;
-				case DELETE:
-					if(!game.getPlayer().getInventory().remove(item))
-						game.getPlayer().getStuff().remove(item);
-					owner.update();
-					itemWindow.dispose();
-					break;
+					break;*/
 			}
+			owner.getToServer().println(response);
+			itemWindow.dispose();
 		}
 	}
 	
-	public ItemWindow(Frame owner, String title, Item item, GameEngine game){
+	public ItemWindow(Frame owner, String title, String item, int index, int itemContainer, int itemSubContainer){
 		super(owner, title);
 		Toolkit tkt = Toolkit.getDefaultToolkit();
 		Dimension itemWindowDim = tkt.getScreenSize();
@@ -58,7 +71,25 @@ public class ItemWindow extends JDialog implements GameInterfaceConstants{
 		int width = (int)itemWindowDim.getWidth();
 		this.setBounds(width/2-width/4, height/2-height/4, width/2, height/2);
 		this.item = item;
-		this.game = game;
+		this.index = index;
+		this.itemContainer = itemContainer;
+		this.itemSubContainer = itemSubContainer;
+		this.owner = (GameWindow)owner;
+		initiate();
+		setModal(true);
+		setVisible(true);
+	}
+	
+	public ItemWindow(Frame owner, String title, String item, int index, int itemContainer){
+		super(owner, title);
+		Toolkit tkt = Toolkit.getDefaultToolkit();
+		Dimension itemWindowDim = tkt.getScreenSize();
+		int height = (int)itemWindowDim.getHeight();
+		int width = (int)itemWindowDim.getWidth();
+		this.setBounds(width/2-width/4, height/2-height/4, width/2, height/2);
+		this.item = item;
+		this.index = index;
+		this.itemContainer = itemContainer;
 		this.owner = (GameWindow)owner;
 		initiate();
 		setModal(true);
@@ -68,7 +99,8 @@ public class ItemWindow extends JDialog implements GameInterfaceConstants{
 	public JPanel getCenterPanel(){
 		JPanel centerPanel = new JPanel(new GridLayout(1,2,5,5));
 		JPanel centerWestPanel = new JPanel(new BorderLayout());
-		JTextArea statsField = new JTextArea(item.toString());
+		JTextArea statsField = new JTextArea(item);
+		statsField.append("\n sous conteneur :" + itemSubContainer);
 		statsField.setEditable(false);
 		JPanel centerEastPanel = new JPanel(new GridLayout(2, 1));
 		JLabel itemDesign = new JLabel(new ImageIcon("POULET.png"));

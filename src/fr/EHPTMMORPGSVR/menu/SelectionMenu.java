@@ -13,18 +13,20 @@ public class SelectionMenu extends JFrame implements MenuConstants{
 	
 	class MenuButtonListener implements ActionListener{
 		int action; 
+		SelectionMenu owner;
 		
-		public MenuButtonListener(int action){
+		public MenuButtonListener(int action, SelectionMenu owner){
 			this.action = action;
+			this.owner = owner;
 		}
 		
 		public void actionPerformed(ActionEvent e){
 			switch(action){
 				case NEW_CHARACTER:
-					new CharacterCreationWindow();
+					new CharacterCreationWindow(owner);
 					break;
 				case SELECT_CHARACTER:
-					new CharacterSelectionWindow();
+					new CharacterSelectionWindow(owner);
 					break;
 			}
 		}
@@ -54,9 +56,9 @@ public class SelectionMenu extends JFrame implements MenuConstants{
 		
 		
 		JButton newCharacter = new JButton("Nouveau personnage");
-		newCharacter.addActionListener(new MenuButtonListener(NEW_CHARACTER));
-		JButton selectCharacter = new JButton("Charager personnage");
-		selectCharacter.addActionListener(new MenuButtonListener(SELECT_CHARACTER));
+		newCharacter.addActionListener(new MenuButtonListener(NEW_CHARACTER, this));
+		JButton selectCharacter = new JButton("Charger personnage");
+		selectCharacter.addActionListener(new MenuButtonListener(SELECT_CHARACTER, this));
 		
 		inCenterPanel.add(newCharacter);
 		inCenterPanel.add(selectCharacter);
